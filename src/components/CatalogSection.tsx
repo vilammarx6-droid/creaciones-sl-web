@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Search, SlidersHorizontal, Award, ShoppingBag, MessageCircle, PackageSearch } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { Search, SlidersHorizontal, Award, ShoppingBag, MessageCircle, PackageSearch, ChevronDown, ChevronUp } from 'lucide-react';
 import { Product, CategoryId, GenderFilter, Currency } from '../types';
 import { PRODUCTS } from '../data/products';
 import { formatPrice, buildWhatsAppUrl } from '../utils/format';
@@ -41,6 +41,8 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
   onOpenProductModal,
   onQuickAddToCart,
 }) => {
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
   // Category counts
   const categoryCounts = useMemo(() => {
     return {
@@ -79,14 +81,21 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
 
   const genderOptions: GenderFilter[] = ['Varón', 'Dama', 'Niño/a', 'Grupal'];
 
+  const hasActiveFilters =
+    activeCategory !== 'all' ||
+    filterStockOnly ||
+    filterCustomOnly ||
+    selectedGender !== null ||
+    searchQuery.trim() !== '';
+
   return (
-    <main id="catalogo-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+    <main id="catalogo-section" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 flex-1 w-full">
       {/* CATALOG CONTROLS & BREADCRUMB */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-[#E8DFD1]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 sm:pb-6 border-b border-[#E8DFD1]">
         <div>
-          <h2 className="font-serif text-2xl font-bold text-[#3A2312] flex items-center gap-2">
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#3A2312] flex items-center gap-2 flex-wrap">
             <span>Catálogo de Confecciones</span>
-            <span className="text-xs font-sans font-semibold px-2 py-0.5 rounded-full bg-[#C49A2C]/20 text-[#9A741B] border border-[#C49A2C]/30">
+            <span className="text-xs font-sans font-semibold px-2 py-0.5 rounded-full bg-[#C49A2C]/20 text-[#9A741B] border border-[#C49A2C]/30 shrink-0">
               {filteredProducts.length} Modelos
             </span>
           </h2>
@@ -96,45 +105,60 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
         </div>
 
         {/* Quick Search and Sort */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full md:w-auto">
+          <div className="relative flex-1 sm:w-56">
             <Search className="w-4 h-4 text-[#3A2312]/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Buscar chaleco, pollera, faja..."
-              className="pl-9 pr-3 py-2 text-xs rounded-xl border border-[#E8DFD1] bg-white focus:outline-none focus:ring-2 focus:ring-[#C49A2C] w-56 text-[#3A2312]"
+              placeholder="Buscar chaleco, pollera..."
+              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-[#E8DFD1] bg-white focus:outline-none focus:ring-2 focus:ring-[#C49A2C] text-[#3A2312]"
             />
           </div>
 
-          <select
-            value={sortMethod}
-            onChange={(e) => onSortChange(e.target.value as 'featured' | 'price-asc' | 'price-desc')}
-            className="text-xs rounded-xl border border-[#E8DFD1] bg-white py-2 px-3 text-[#3A2312] focus:outline-none focus:ring-2 focus:ring-[#C49A2C] font-medium cursor-pointer"
-          >
-            <option value="featured">Destacados / Gala</option>
-            <option value="price-asc">Precio: Menor a Mayor</option>
-            <option value="price-desc">Precio: Mayor a Menor</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <select
+              value={sortMethod}
+              onChange={(e) => onSortChange(e.target.value as 'featured' | 'price-asc' | 'price-desc')}
+              aria-label="Ordenar productos"
+              className="flex-1 sm:flex-initial text-xs rounded-xl border border-[#E8DFD1] bg-white py-2 px-3 text-[#3A2312] focus:outline-none focus:ring-2 focus:ring-[#C49A2C] font-medium cursor-pointer"
+            >
+              <option value="featured">Destacados / Gala</option>
+              <option value="price-asc">Precio: Menor a Mayor</option>
+              <option value="price-desc">Precio: Mayor a Menor</option>
+            </select>
+
+            {/* Mobile Filter Toggle Button */}
+            <button
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="lg:hidden px-3 py-2 rounded-xl border border-[#C49A2C]/50 bg-[#F2EDE4] text-[#3A2312] text-xs font-bold flex items-center gap-1.5 shrink-0 cursor-pointer"
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#C49A2C]" />
+              <span>Filtros</span>
+              {showMobileFilters ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* LAYOUT: FILTERS SIDEBAR + PRODUCTS GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 pt-6">
-        {/* SIDEBAR FILTERS */}
-        <aside className="space-y-6">
-          <div className="bg-white p-5 rounded-2xl border border-[#E8DFD1] shadow-xs space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 pt-5 sm:pt-6">
+        {/* SIDEBAR FILTERS (collapsible on mobile, always visible on lg) */}
+        <aside className={`${showMobileFilters ? 'block' : 'hidden'} lg:block space-y-6`}>
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-[#E8DFD1] shadow-xs space-y-5">
             <div className="flex items-center justify-between border-b border-[#E8DFD1] pb-3">
               <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-[#3A2312] flex items-center gap-1.5">
-                <SlidersHorizontal className="w-4 h-4 text-[#C49A2C]" /> Filtros
+                <SlidersHorizontal className="w-4 h-4 text-[#C49A2C]" /> Filtros de Selección
               </h3>
-              <button
-                onClick={onResetFilters}
-                className="text-[11px] text-[#A85A28] hover:underline font-semibold cursor-pointer"
-              >
-                Limpiar todo
-              </button>
+              {hasActiveFilters && (
+                <button
+                  onClick={onResetFilters}
+                  className="text-[11px] text-[#A85A28] hover:underline font-semibold cursor-pointer"
+                >
+                  Limpiar todo
+                </button>
+              )}
             </div>
 
             {/* Filter: Categoría */}
@@ -148,7 +172,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   className={`w-full text-left px-3 py-2 rounded-lg font-medium transition flex items-center justify-between cursor-pointer ${
                     activeCategory === 'all'
                       ? 'bg-[#F2EDE4] text-[#3A2312] font-bold'
-                      : 'hover:bg-[#F2EDE4] text-[#3A2312]/80'
+                      : 'hover:bg-[#F2EDE4]/60 text-[#3A2312]/80'
                   }`}
                 >
                   <span>Todos los trajes</span>
@@ -162,7 +186,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   className={`w-full text-left px-3 py-2 rounded-lg font-medium transition flex items-center justify-between cursor-pointer ${
                     activeCategory === 'chalecos'
                       ? 'bg-[#F2EDE4] text-[#3A2312] font-bold'
-                      : 'hover:bg-[#F2EDE4] text-[#3A2312]/80'
+                      : 'hover:bg-[#F2EDE4]/60 text-[#3A2312]/80'
                   }`}
                 >
                   <span>Chalecos de Q'orilazo</span>
@@ -176,7 +200,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   className={`w-full text-left px-3 py-2 rounded-lg font-medium transition flex items-center justify-between cursor-pointer ${
                     activeCategory === 'polleras'
                       ? 'bg-[#F2EDE4] text-[#3A2312] font-bold'
-                      : 'hover:bg-[#F2EDE4] text-[#3A2312]/80'
+                      : 'hover:bg-[#F2EDE4]/60 text-[#3A2312]/80'
                   }`}
                 >
                   <span>Chaquetillas y Polleras</span>
@@ -190,7 +214,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   className={`w-full text-left px-3 py-2 rounded-lg font-medium transition flex items-center justify-between cursor-pointer ${
                     activeCategory === 'comparsas'
                       ? 'bg-[#F2EDE4] text-[#3A2312] font-bold'
-                      : 'hover:bg-[#F2EDE4] text-[#3A2312]/80'
+                      : 'hover:bg-[#F2EDE4]/60 text-[#3A2312]/80'
                   }`}
                 >
                   <span>Trajes para Comparsas</span>
@@ -204,7 +228,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   className={`w-full text-left px-3 py-2 rounded-lg font-medium transition flex items-center justify-between cursor-pointer ${
                     activeCategory === 'accesorios'
                       ? 'bg-[#F2EDE4] text-[#3A2312] font-bold'
-                      : 'hover:bg-[#F2EDE4] text-[#3A2312]/80'
+                      : 'hover:bg-[#F2EDE4]/60 text-[#3A2312]/80'
                   }`}
                 >
                   <span>Accesorios & Fajas</span>
@@ -254,7 +278,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                     <button
                       key={g}
                       onClick={() => onSelectGender(isSelected ? null : g)}
-                      className={`py-1.5 px-2 rounded-lg border text-center font-medium transition cursor-pointer ${
+                      className={`py-1.5 px-2 rounded-lg border text-center font-medium transition cursor-pointer truncate ${
                         isSelected
                           ? 'bg-[#C49A2C] text-[#261509] font-bold border-[#C49A2C]'
                           : 'border-[#E8DFD1] hover:bg-[#F2EDE4] text-[#3A2312]'
@@ -268,9 +292,9 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
             </div>
 
             {/* Callout Don Luis Alfredo */}
-            <div className="bg-[#F2EDE4]/60 p-4 rounded-xl border border-[#E8DFD1]/80 text-xs space-y-2">
+            <div className="bg-[#F2EDE4]/60 p-3.5 rounded-xl border border-[#E8DFD1]/80 text-xs space-y-1.5">
               <div className="flex items-center gap-2 font-bold text-[#3A2312]">
-                <Award className="w-4 h-4 text-[#C49A2C]" />
+                <Award className="w-4 h-4 text-[#C49A2C] shrink-0" />
                 <span>Garantía de Don Luis Alfredo</span>
               </div>
               <p className="text-[#3A2312]/80 text-[11px] leading-relaxed">
@@ -281,9 +305,9 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
         </aside>
 
         {/* PRODUCTS GRID */}
-        <section className="lg:col-span-3">
+        <section className="lg:col-span-3 min-w-0">
           {filteredProducts.length === 0 ? (
-            <div className="text-center py-16 bg-white rounded-2xl border border-[#E8DFD1] p-8">
+            <div className="text-center py-16 bg-white rounded-2xl border border-[#E8DFD1] p-6 sm:p-8">
               <PackageSearch className="w-12 h-12 text-[#A85A28] mx-auto mb-3" />
               <h3 className="font-serif text-lg font-bold text-[#3A2312]">
                 No encontramos trajes con estos filtros
@@ -299,7 +323,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
               {filteredProducts.map((product) => {
                 const whatsappQuickUrl = buildWhatsAppUrl(
                   `Hola Don Luis Alfredo, deseo consultar por el traje *${product.title}* (${formatPrice(product.pricePEN, 'PEN')}).`
@@ -308,10 +332,10 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                 return (
                   <div
                     key={product.id}
-                    className="bg-white rounded-2xl border border-[#E8DFD1] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group"
+                    className="bg-white rounded-2xl border border-[#E8DFD1] overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col group min-w-0"
                   >
-                    {/* Image Box with Quick View */}
-                    <div className="relative bg-[#F2EDE4]/50 p-6 aspect-square flex items-center justify-center overflow-hidden border-b border-[#E8DFD1]">
+                    {/* Image Box */}
+                    <div className="relative bg-[#F2EDE4]/50 p-4 sm:p-6 aspect-square flex items-center justify-center overflow-hidden border-b border-[#E8DFD1]">
                       <img
                         src={product.img}
                         alt={product.title}
@@ -320,8 +344,8 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                       />
 
                       {/* Badges */}
-                      <div className="absolute top-3 left-3 flex flex-col gap-1 items-start">
-                        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#3A2312] text-[#C49A2C] border border-[#C49A2C]/50 shadow-xs">
+                      <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start max-w-[85%]">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#3A2312] text-[#C49A2C] border border-[#C49A2C]/50 shadow-xs truncate max-w-full">
                           {product.tag}
                         </span>
                         {product.stock ? (
@@ -334,26 +358,16 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                           </span>
                         )}
                       </div>
-
-                      {/* Quick Look Overlay */}
-                      <div className="absolute inset-0 bg-[#3A2312]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-4">
-                        <button
-                          onClick={() => onOpenProductModal(product)}
-                          className="px-3.5 py-2 rounded-xl bg-white text-[#3A2312] font-bold text-xs shadow-lg hover:bg-[#C49A2C] hover:text-[#261509] transition transform translate-y-2 group-hover:translate-y-0 cursor-pointer"
-                        >
-                          Ver Detalles y Medidas
-                        </button>
-                      </div>
                     </div>
 
                     {/* Product Details */}
-                    <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
-                      <div>
+                    <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3 min-w-0">
+                      <div className="min-w-0">
                         <div className="flex items-center justify-between text-[11px] text-[#A85A28] font-semibold uppercase tracking-wider mb-1">
                           <span>{product.gender}</span>
                           <span>Livitaca</span>
                         </div>
-                        <h3 className="font-serif font-bold text-base text-[#3A2312] line-clamp-1 group-hover:text-[#9A741B] transition-colors">
+                        <h3 className="font-serif font-bold text-sm sm:text-base text-[#3A2312] line-clamp-1 group-hover:text-[#9A741B] transition-colors">
                           {product.title}
                         </h3>
                         <p className="text-xs text-[#3A2312]/70 line-clamp-2 mt-1 leading-relaxed">
@@ -364,7 +378,7 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                       <div className="pt-2 border-t border-[#E8DFD1]/80">
                         <div className="flex items-baseline justify-between mb-3">
                           <span className="text-xs text-[#3A2312]/60">Precio:</span>
-                          <span className="font-serif font-bold text-lg text-[#3A2312]">
+                          <span className="font-serif font-bold text-base sm:text-lg text-[#3A2312]">
                             {formatPrice(product.pricePEN, currency)}
                           </span>
                         </div>
@@ -373,15 +387,16 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                         <div className="grid grid-cols-2 gap-2">
                           <button
                             onClick={() => onQuickAddToCart(product)}
-                            className="py-2 px-2 rounded-xl bg-[#F2EDE4] hover:bg-[#E8DFD1] text-[#3A2312] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                            className="py-2 px-2 rounded-xl bg-[#F2EDE4] hover:bg-[#E8DFD1] text-[#3A2312] font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer min-w-0"
                           >
-                            <ShoppingBag className="w-3.5 h-3.5" /> Añadir
+                            <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">Añadir</span>
                           </button>
                           <button
                             onClick={() => onOpenProductModal(product)}
-                            className="py-2 px-2 rounded-xl bg-[#3A2312] hover:bg-[#261509] text-[#C49A2C] font-bold text-xs flex items-center justify-center gap-1 transition cursor-pointer"
+                            className="py-2 px-2 rounded-xl bg-[#3A2312] hover:bg-[#261509] text-[#C49A2C] font-bold text-xs flex items-center justify-center gap-1 transition cursor-pointer min-w-0"
                           >
-                            Configurar
+                            <span className="truncate">Configurar</span>
                           </button>
                         </div>
 
@@ -390,10 +405,10 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                           href={whatsappQuickUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="w-full mt-2 py-1.5 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center justify-center gap-1 transition"
+                          className="w-full mt-2 py-1.5 text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center justify-center gap-1 transition truncate"
                         >
-                          <MessageCircle className="w-3 h-3 text-emerald-600" />
-                          <span>Pedir por WhatsApp en 1 Clic</span>
+                          <MessageCircle className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <span className="truncate">Pedir por WhatsApp</span>
                         </a>
                       </div>
                     </div>

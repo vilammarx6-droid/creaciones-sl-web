@@ -239,8 +239,16 @@ export default function App() {
         onClose={() => setConfirmedOrder(null)}
       />
 
-      {/* Floating WhatsApp CTA */}
-      <FloatingWhatsApp />
+      {/* Floating WhatsApp CTA (hidden when any modal or drawer is open to prevent overlap) */}
+      <FloatingWhatsApp
+        isHidden={
+          isCartOpen ||
+          !!activePdpProduct ||
+          isTailoringModalOpen ||
+          isCheckoutOpen ||
+          !!confirmedOrder
+        }
+      />
     </div>
   );
 }
