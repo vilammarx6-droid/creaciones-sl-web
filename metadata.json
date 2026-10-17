@@ -1,0 +1,6 @@
+{
+  "name": "Creaciones SL - Trajes Típicos de Chumbivilcas",
+  "description": "Tienda virtual de alta costura andina y chalecos de Q'orilazo confeccionados artesanalmente en Livitaca, Chumbivilcas por Don Luis Alfredo Shuyen Villalobos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

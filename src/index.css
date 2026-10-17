@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-chocolate: #3A2312;
+  --color-brand-dark: #261509;
+  --color-brand-gold: #C49A2C;
+  --color-brand-gold-light: #E8BC4C;
+  --color-brand-gold-dark: #9A741B;
+  --color-brand-copper: #A85A28;
+  --color-brand-terracotta: #8C3D15;
+  --color-brand-linen: #FAFAF7;
+  --color-brand-sand: #F2EDE4;
+  --color-brand-cream: #FFFDF9;
+  --color-brand-border: #E8DFD1;
+  --font-serif: 'Cinzel', serif;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+  background-color: #FAFAF7;
+  color: #3A2312;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: 'Cinzel', Georgia, serif;
+}
+
+/* Subtle textile linen texture */
+.linen-pattern {
+  background-color: #FAFAF7;
+  background-image: radial-gradient(#d8ccba 0.75px, transparent 0.75px), radial-gradient(#d8ccba 0.75px, #FAFAF7 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F2EDE4;
+}
+::-webkit-scrollbar-thumb {
+  background: #C49A2C;
+  border-radius: 9999px;
+}
